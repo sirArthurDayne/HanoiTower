@@ -69,15 +69,16 @@ public:
 	std::vector<int> towers[3];
 	int diskAmount;
 	std::wstring playerName;
-	
+	bool game1;//1: activate recursive, 0: activate stack
+
 	mainEngine()
 	{
-		m_sAppName = L"JUEGO DE HANOI";
+		m_sAppName = L"JUEGO DE TORRE DE HANOI";
 	}
 	
 	bool OnUserCreate()
 	{
-		 
+		game1 = true;
 		return true;
 	}
 
@@ -88,7 +89,10 @@ public:
 		{
 			if (GameStartMenu())
 			{
-				state = RECURSIVEGAME;
+				if (game1)
+					state = RECURSIVEGAME;
+				else
+					state = STACKGAME;
 			}
 		}
 		if (state == RECURSIVEGAME)
@@ -97,6 +101,10 @@ public:
 			{
 				state = START;
 			}
+		}
+		if (state == STACKGAME)
+		{
+			
 		}
 		 
 
@@ -142,7 +150,12 @@ public:
 		}
 
 		//letter for activating hanoiStack
-		
+		if (m_keys['S'].bReleased)
+		{
+			SetUpStackHanoi(diskAmount);
+			game1 = false;
+			return true;
+		}
 		//letter for SCORES
 		
 		//letter for Exit
@@ -252,6 +265,15 @@ public:
 
 		
 	}
+
+
+	void SetUpStackHanoi(int disks)
+	{
+		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_GREEN);
+		
+	}
+
+
 
 	void ClearVectors()
 	{
