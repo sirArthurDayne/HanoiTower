@@ -19,7 +19,7 @@
 	  |				|			 |
 
 	TORRE[A]      TORRE[B]     TORRE[C]
-	    1            2            3
+	    0            1           2
  */
 
 struct move {
@@ -31,20 +31,34 @@ struct move {
 	int from, to;
 };
 
-void HanoiRecursion(int nDisks, int first, int middle, int last, std::vector<move>& _moves)
+struct vecContainer 
+{
+	vecContainer() {}
+	std::vector<move> _moves;
+
+	void addMove(move old) {
+		_moves.push_back(move(old.from, old.to));
+	}
+	std::vector<move> getMoves() { return _moves; }
+	int getSize() { return _moves.size(); }
+};
+
+vecContainer moveContainer;
+
+void HanoiRecursion(int nDisks, int first, int middle, int last)
 {
 	//nDisks work has iterator
 	if (nDisks > 0)
 	{
-		HanoiRecursion(nDisks - 1, first, last, middle, _moves);
-		_moves.push_back(move(first, middle));
-		HanoiRecursion(nDisks - 1, last, middle, first, _moves);
+		HanoiRecursion(nDisks - 1, first, last, middle);
+		moveContainer.addMove(move(first, middle));
+		HanoiRecursion(nDisks - 1, last, middle, first);
 	}
 }
 
 
 
-class HanoiGames : public olcConsoleGameEngine {
+class mainEngine : public olcConsoleGameEngine {
 public:
 	std::vector<move> moveset;
 	std::vector<int> towers[3];
@@ -54,9 +68,17 @@ public:
 		int towerA = 0;
 		int towerB = 1;
 		int towerC = 2;
-		int diskAmount = 3;
-		HanoiRecursion(diskAmount, towerA, towerC, towerB, moveset);
-		for (int i = 0; i < diskAmount; i++) towers[0].push_back(diskAmount - i);
+		int diskAmount = 4;
+		HanoiRecursion(diskAmount, towerA, towerC, towerB);
+		
+		for (int i = 0; i < moveContainer.getSize(); i++) 
+		{
+			moveset.push_back(move(moveContainer._moves.at(i).from, moveContainer._moves.at(i).to));
+		}
+
+		for (int i = 0; i < diskAmount; i++) 
+			towers[0].push_back(diskAmount - i);
+		
 		return true;
 	}
 
@@ -79,8 +101,10 @@ public:
 				nmove++;
 			}
 		}
+		
 		Fill(0, 0, 160, 100, ' ', BG_DARK_BLUE);
 		for (int i = 0; i < 3; i++) {
+
 			if (towers[i].size() > 0) {
 				for (int j = 0; j < towers[i].size(); j++) {
 					int _size = towers[i].at(j);
@@ -102,7 +126,7 @@ public:
 int main()
 {
 
-	HanoiGames game;
+	mainEngine game;
 
 	game.ConstructConsole(160, 100, 8, 8);
 
