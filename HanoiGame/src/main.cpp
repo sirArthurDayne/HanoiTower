@@ -68,19 +68,16 @@ public:
 	std::vector<move> moveset;
 	std::vector<int> towers[3];
 	int diskAmount;
-
+	std::wstring playerName;
+	
+	mainEngine()
+	{
+		m_sAppName = L"JUEGO DE HANOI";
+	}
+	
 	bool OnUserCreate()
 	{
-
-		//int towerA = 0;
-		//int towerB = 1;
-		//int towerC = 2;
-		//diskAmount = 3;
-		//HanoiRecursion(diskAmount, towerA, towerC, towerB);
-
-		
-
-
+		 
 		return true;
 	}
 
@@ -98,7 +95,7 @@ public:
 		{
 			if (DrawRecursiveHanoiGame(fElapsedTime))
 			{
-				state = EXIT;
+				state = START;
 			}
 		}
 		
@@ -115,6 +112,9 @@ public:
 		//background
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
 		
+		//title 
+		DrawString(ScreenWidth()/2 - 20, 10, L"LOS JUEGOS DE HANOI", FG_WHITE);
+
 		DrawString(10, 25, L"SELECCIONE LA CANTIDAD DE DISCOS", FG_WHITE);
 		
 		//disks selection
@@ -149,7 +149,7 @@ public:
 		if (m_keys[VK_ESCAPE].bReleased)
 		{
 			state = EXIT;
-			return true;
+			//return true;
 		}
 
 		return false;
@@ -216,12 +216,31 @@ public:
 			}
 		}
 
-			
+		//volver a mwnu
+		if (m_keys['M'].bReleased)
+		{
+			ClearVectors();
+			return true;
+		}
+		//end app
+		else if (m_keys[VK_ESCAPE].bReleased)
+		{
+			return true;
+		}
+		 	
 		return false;
 
 		
 	}
 
+	void ClearVectors()
+	{
+		moveset.clear();
+		for (int i = 0; i < 3; i++)
+		{
+			towers[i].clear();
+		}
+	}
 };
 
 
@@ -230,8 +249,11 @@ int main()
 {
 
 	mainEngine game;
+	const int w = 160;
+	const int h = 100;
 
-	game.ConstructConsole(160, 100, 8, 8);
+	const int pixelSize = 8;
+	game.ConstructConsole(w, h, pixelSize, pixelSize);
 
 	game.Start();
 
