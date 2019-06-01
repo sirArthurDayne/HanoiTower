@@ -98,7 +98,7 @@ public:
 				state = START;
 			}
 		}
-		
+		 
 
 		if (state == EXIT)
 			return false;
@@ -179,11 +179,15 @@ public:
 		static float timer = 0;
 		static int nmove = 0;
 		timer += deltaTime;
-		if (timer > 0.5) {
+
+		if (timer > 0.5) 
+		{
 			timer -= 0.5;
-			if (nmove < moveset.size()) {
+			if (nmove < moveset.size())
+			{
 				towers[moveset[nmove].to].push_back(towers[moveset[nmove].from].back());
 				towers[moveset[nmove].from].pop_back();
+				
 				towers[moveset[nmove].from].shrink_to_fit();
 				towers[moveset[nmove].to].shrink_to_fit();
 
@@ -192,23 +196,37 @@ public:
 		}
 		//fondo
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_BLACK);
-		
-		//dibujar torres
-		Fill(20 + (0 * 40), 90 - 25, (18 + (0 * 40)) + 3, 90, ' ', BG_DARK_BLUE);
-		Fill(20 + (1 * 40), 90 - 25, (18 + (1 * 40)) + 3, 90, ' ', BG_DARK_GREEN);
-		Fill(20 + (2 * 40), 90 - 25, (18 + (2 * 40)) + 3, 90, ' ', BG_DARK_RED);
 		//torres texto
 		DrawString(18 + (0 * 40), 90 - 30, L"TORRE 0", FG_DARK_BLUE);
 		DrawString(18 + (1 * 40), 90 - 30, L"TORRE 1", FG_DARK_GREEN);
 		DrawString(18 + (2 * 40), 90 - 30, L"TORRE 2", FG_DARK_RED);
+		
+		//dibujar torres en pantalla
+		for (int i = 0; i < 3; i++)
+		{
+			int xTowerCoord = 20 + (i * 40);
+			int yTowerCoord = 90 - 25;
+			short color; 
+			if (i == 0) color = BG_DARK_BLUE;
+			if (i == 1) color = BG_DARK_GREEN;
+			if (i == 2) color = BG_DARK_RED;
+			
+			Fill(xTowerCoord, yTowerCoord, (xTowerCoord -2) + 3, yTowerCoord + 25, ' ', color);
+		}
+		
+		
+		
+		
+		for (int i = 0; i < 3; i++)
+		{
 
-		for (int i = 0; i < 3; i++) {
-
-			if (towers[i].size() > 0) {
-				for (int j = 0; j < towers[i].size(); j++) {
-					
-					//drawing the disks
-					int _size = towers[i].at(j);
+			//si aun hay movimientos en las torres
+			if (towers[i].size() > 0) 
+			{
+				for (int j = 0; j < towers[i].size(); j++) 
+				{
+					//dibujar los discos
+					int _size = towers[i].at(j);//torre i disco j
 					int xdiskCoord = 20 + i * 40 - (_size + 4);
 					int ydiskCoord = 90 - (j * 3);
 					Fill(xdiskCoord, ydiskCoord, xdiskCoord + (_size + 4) * 2 + 1, ydiskCoord + 3, ' ', BG_DARK_CYAN);
@@ -216,15 +234,17 @@ public:
 			}
 		}
 
-		//volver a mwnu
+		//volver a menu
 		if (m_keys['M'].bReleased)
 		{
 			ClearVectors();
 			return true;
 		}
+
 		//end app
 		else if (m_keys[VK_ESCAPE].bReleased)
 		{
+			state = EXIT;
 			return true;
 		}
 		 	
@@ -246,20 +266,15 @@ public:
 
 
 int main()
-{
+{	
+		mainEngine game;
+		const int w = 160;
+		const int h = 100;
 
-	mainEngine game;
-	const int w = 160;
-	const int h = 100;
-
-	const int pixelSize = 8;
-	game.ConstructConsole(w, h, pixelSize, pixelSize);
-
-	game.Start();
-
-
-
-	std::cin.get();
-	std::cin.get();
-	return 0;
+		const int pixelSize = 8;
+		if (game.ConstructConsole(w, h, pixelSize, pixelSize))
+			game.Start();
+		
+		return 0;
+	
 }
