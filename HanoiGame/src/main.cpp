@@ -290,10 +290,10 @@ public:
 int main()
 {	
 		mainEngine game;
-		const int w = 160;
+		const int w = 120;
 		const int h = 100;
 
-		const int pixelSize = 8;
+		const int pixelSize = 10;
 		if (game.ConstructConsole(w, h, pixelSize, pixelSize))
 			game.Start();
 		
