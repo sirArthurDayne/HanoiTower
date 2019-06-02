@@ -60,22 +60,22 @@ void HanoiRecursion(int nDisks, int first, int middle, int last)
 	}
 }
 
+std::vector<move> moveset;
 
 
 class mainEngine : public olcConsoleGameEngine {
 public:
 	STATES state = START;
-	std::vector<move> moveset;
 	std::vector<int> towers[3];
 	int diskAmount;
 	std::wstring playerName;
 	bool game1;//1: activate recursive, 0: activate stack
-
+	int mouseHolder = 0;//the disk size pickup by the mouse
 	mainEngine()
 	{
 		m_sAppName = L"JUEGO DE TORRE DE HANOI";
 	}
-	
+
 	bool OnUserCreate()
 	{
 		game1 = true;
@@ -104,13 +104,16 @@ public:
 		}
 		if (state == STACKGAME)
 		{
-			
+			if (DrawStackHanoiGame())
+			{
+				state = START;
+			}
 		}
-		 
+
 
 		if (state == EXIT)
 			return false;
-		
+
 		return true;
 	}
 
@@ -119,12 +122,12 @@ public:
 	{
 		//background
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
-		
+
 		//title 
-		DrawString(ScreenWidth()/2 - 20, 10, L"LOS JUEGOS DE HANOI", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 20, 10, L"LOS JUEGOS DE HANOI", FG_WHITE);
 
 		DrawString(10, 25, L"SELECCIONE LA CANTIDAD DE DISCOS", FG_WHITE);
-		
+
 		//disks selection
 		if (diskAmount < 3 || diskAmount > 8)
 			diskAmount = 3;
@@ -134,14 +137,14 @@ public:
 		else if (m_keys[VK_DOWN].bReleased)
 			diskAmount--;
 
-		std::wstring diskNumber= std::to_wstring(diskAmount);
+		std::wstring diskNumber = std::to_wstring(diskAmount);
 		DrawString(45, 25, diskNumber, FG_WHITE);
-		
+
 		DrawString(10, 30, L"PRESIONE 'R' PARA ACTIVAR HANOIRECURSIVO", FG_WHITE);//press R for recursiveHanoi
-		
+
 		DrawString(10, 40, L"PRESIONE 'S' PARA ACTIVAR HANOISTACK", FG_WHITE);//press S for hanoiStack
 		DrawString(10, 50, L"PRESIONE 'ESC' PARA SALIR", FG_WHITE);//exit mode
-		
+
 		//letter for activating hanoiRecursive
 		if (m_keys['R'].bReleased)
 		{
@@ -157,7 +160,7 @@ public:
 			return true;
 		}
 		//letter for SCORES
-		
+
 		//letter for Exit
 		if (m_keys[VK_ESCAPE].bReleased)
 		{
@@ -181,8 +184,8 @@ public:
 			moveset.push_back(move(moveContainer._moves.at(i).from, moveContainer._moves.at(i).to));
 		}
 
-		for (int i = 0; i < diskAmount; i++)
-			towers[0].push_back(diskAmount - i);
+		for (int i = 0; i < disks; i++)
+			towers[0].push_back(disks - i);
 	}
 
 
@@ -193,59 +196,113 @@ public:
 		static int nmove = 0;
 		timer += deltaTime;
 
-		if (timer > 0.5) 
+		if (timer > 0.5)
 		{
 			timer -= 0.5;
 			if (nmove < moveset.size())
 			{
 				towers[moveset[nmove].to].push_back(towers[moveset[nmove].from].back());
 				towers[moveset[nmove].from].pop_back();
-				
+
 				towers[moveset[nmove].from].shrink_to_fit();
 				towers[moveset[nmove].to].shrink_to_fit();
 
 				nmove++;
 			}
 		}
-		//fondo
-		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_BLACK);
-		//torres texto
-		DrawString(18 + (0 * 40), 90 - 30, L"TORRE 0", FG_DARK_BLUE);
-		DrawString(18 + (1 * 40), 90 - 30, L"TORRE 1", FG_DARK_GREEN);
-		DrawString(18 + (2 * 40), 90 - 30, L"TORRE 2", FG_DARK_RED);
 		
-		//dibujar torres en pantalla
-		for (int i = 0; i < 3; i++)
+		//Graphics	
+		DrawTowers(FG_BLACK, BG_DARK_MAGENTA);
+		
+		
+		//menu
+		if (m_keys['M'].bReleased)
 		{
-			int xTowerCoord = 20 + (i * 40);
-			int yTowerCoord = 90 - 25;
-			short color; 
-			if (i == 0) color = BG_DARK_BLUE;
-			if (i == 1) color = BG_DARK_GREEN;
-			if (i == 2) color = BG_DARK_RED;
-			
-			Fill(xTowerCoord, yTowerCoord, (xTowerCoord -2) + 3, yTowerCoord + 25, ' ', color);
+			ClearVectors();
+			return true;
 		}
-		
-		
-		
-		
-		for (int i = 0; i < 3; i++)
-		{
 
-			//si aun hay movimientos en las torres
-			if (towers[i].size() > 0) 
+		//end app
+		else if (m_keys[VK_ESCAPE].bReleased)
+		{
+			state = EXIT;
+			return true;
+		}
+
+		return false;
+
+
+	}
+
+
+	void SetUpStackHanoi(int disks)
+	{
+		//insert disks on tower 0
+		for (int i = 0; i < disks; i++)
+			towers[0].push_back(disks - i);
+	}
+
+
+	void CheckMouseInput()
+	{
+		if (GetMouse(0).bReleased)
+		{
+			int mouseX = GetMouseX();
+			int mouseY = GetMouseY();
+
+			if (mouseHolder != 0)
 			{
-				for (int j = 0; j < towers[i].size(); j++) 
+				for (int i = 0; i < 3; i++)
 				{
-					//dibujar los discos
-					int _size = towers[i].at(j);//torre i disco j
-					int xdiskCoord = 20 + i * 40 - (_size + 4);
-					int ydiskCoord = 90 - (j * 3);
-					Fill(xdiskCoord, ydiskCoord, xdiskCoord + (_size + 4) * 2 + 1, ydiskCoord + 3, ' ', BG_DARK_CYAN);
+					if ((mouseX < i * 40 + 20) && (mouseX > i * 40 - 20) && (mouseY < 90 && mouseY >  65))//this means we have hit tower[i], or a box around tower[i] at least
+					{
+						if (towers[i].empty() || towers[i].back() > mouseHolder)
+						{
+							towers[i].push_back(mouseHolder);
+
+							std::wstring mouseContent = std::to_wstring(mouseHolder);
+							std::wstring towerContent = std::to_wstring(i);
+
+							DrawString(15, 25, mouseContent, FG_WHITE);
+							DrawString(15, 30, towerContent, FG_WHITE);
+							mouseHolder = 0;
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					if ((mouseX < i * 40 + 20) && (mouseX > i * 40 - 20) && (mouseY < 90 && mouseY >  65))
+					{
+						if (towers[i].empty() == false)
+						{
+							mouseHolder = towers[i].back();
+							towers[i].pop_back();
+
+							std::wstring mouseContent = std::to_wstring(mouseHolder);
+							std::wstring towerContent = std::to_wstring(i);
+
+							DrawString(15, 15, mouseContent, FG_WHITE);
+							DrawString(15, 20, towerContent, FG_WHITE);
+						}
+					}
 				}
 			}
 		}
+
+
+
+	}
+
+	bool DrawStackHanoiGame()
+	{
+		//controls
+		CheckMouseInput();
+		
+		//graphics
+		DrawTowers(BG_BLACK, BG_DARK_YELLOW);
 
 		//volver a menu
 		if (m_keys['M'].bReleased)
@@ -260,19 +317,52 @@ public:
 			state = EXIT;
 			return true;
 		}
-		 	
+
 		return false;
 
-		
 	}
 
-
-	void SetUpStackHanoi(int disks)
+	void DrawTowers(short background, short disksColor)
 	{
-		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_GREEN);
-		
-	}
+		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', background);
+		//torres texto
+		DrawString(18 + (0 * 40), 90 - 30, L"TORRE 0", FG_DARK_BLUE);
+		DrawString(18 + (1 * 40), 90 - 30, L"TORRE 1", FG_DARK_GREEN);
+		DrawString(18 + (2 * 40), 90 - 30, L"TORRE 2", FG_DARK_RED);
 
+		//dibujar torres en pantalla
+		for (int i = 0; i < 3; i++)
+		{
+			int xTowerCoord = 20 + (i * 40);
+			int yTowerCoord = 90 - 25;
+			short color;
+			if (i == 0) color = BG_DARK_BLUE;
+			if (i == 1) color = BG_DARK_GREEN;
+			if (i == 2) color = BG_DARK_RED;
+
+			Fill(xTowerCoord, yTowerCoord, (xTowerCoord - 2) + 3, yTowerCoord + 25, ' ', color);
+		}
+
+
+		for (int i = 0; i < 3; i++)
+		{
+
+			//si aun hay movimientos en las torres
+			if (towers[i].size() > 0)
+			{
+				for (int j = 0; j < towers[i].size(); j++)
+				{
+					//dibujar los discos
+					int _size = towers[i].at(j);//torre i disco j
+					int xdiskCoord = 20 + i * 40 - (_size + 4);
+					int ydiskCoord = 90 - (j * 3);
+					Fill(xdiskCoord, ydiskCoord, xdiskCoord + (_size + 4) * 2 + 1, ydiskCoord + 3, ' ', disksColor);
+				}
+			}
+		}
+	
+	
+	}
 
 
 	void ClearVectors()
