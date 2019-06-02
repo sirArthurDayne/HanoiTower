@@ -20,11 +20,11 @@
  */
 
 
-#include <iostream>
+#include<iostream>
 #include<string>
 #include"olcConsoleGameEngine.h"
 
-enum STATES {START, RECURSIVEGAME, STACKGAME, SCORES, EXIT};
+enum STATES {START, RECURSIVEGAME, STACKGAME, SCORES, CREDITS, EXIT};
 
 struct move {
 	move(int _from, int _to) {
@@ -69,16 +69,16 @@ public:
 	std::vector<int> towers[3];
 	int diskAmount;
 	std::wstring playerName;
-	bool game1;//1: activate recursive, 0: activate stack
+	int mode;//0: nada 1: activa recursividad 2:stack 3:creditos 4:scoreboard 5:salir
 	int mouseHolder = 0;//the disk size pickup by the mouse
 	mainEngine()
 	{
-		m_sAppName = L"JUEGO DE TORRE DE HANOI";
+		m_sAppName = L"LOS JUEGOS DE TORRE DE HANOI";
 	}
 
 	bool OnUserCreate()
 	{
-		game1 = true;
+		mode = 0;
 		return true;
 	}
 
@@ -89,28 +89,34 @@ public:
 		{
 			if (GameStartMenu())
 			{
-				if (game1)
+				if (mode == 1)
 					state = RECURSIVEGAME;
-				else
+				else if (mode == 2)
 					state = STACKGAME;
+				else if (mode == 3)
+					state = CREDITS;
+				else if (mode == 4)
+					state = SCORES;
+				else if (mode == 5)
+					state = EXIT;
 			}
 		}
 		if (state == RECURSIVEGAME)
 		{
-			if (DrawRecursiveHanoiGame(fElapsedTime))
-			{
-				state = START;
-			}
+			DrawRecursiveHanoiGame(fElapsedTime);
 		}
 		if (state == STACKGAME)
 		{
-			if (DrawStackHanoiGame())
-			{
-				state = START;
-			}
+			DrawStackHanoiGame();
 		}
-
-
+		if (state == SCORES)
+		{
+			DrawScores();
+		}
+		if (state == CREDITS)
+		{
+			DrawCredits();
+		}
 		if (state == EXIT)
 			return false;
 
@@ -129,8 +135,8 @@ public:
 		DrawString(10, 25, L"SELECCIONE LA CANTIDAD DE DISCOS", FG_WHITE);
 
 		//disks selection
-		if (diskAmount < 3 || diskAmount > 8)
-			diskAmount = 3;
+		if (diskAmount < 2 || diskAmount > 8)
+			diskAmount = 2;
 
 		if (m_keys[VK_UP].bReleased)
 			diskAmount++;
@@ -140,15 +146,17 @@ public:
 		std::wstring diskNumber = std::to_wstring(diskAmount);
 		DrawString(45, 25, diskNumber, FG_WHITE);
 
-		DrawString(10, 30, L"PRESIONE 'R' PARA ACTIVAR HANOIRECURSIVO", FG_WHITE);//press R for recursiveHanoi
-
-		DrawString(10, 40, L"PRESIONE 'S' PARA ACTIVAR HANOISTACK", FG_WHITE);//press S for hanoiStack
-		DrawString(10, 50, L"PRESIONE 'ESC' PARA SALIR", FG_WHITE);//exit mode
+		DrawString(10, 30, L"PRESIONE 'R' PARA HANOIRECURSIVO", FG_WHITE);//press R for recursiveHanoi
+		DrawString(10, 40, L"PRESIONE 'S' PARA HANOISTACK", FG_WHITE);//press S for hanoiStack
+		DrawString(10, 50, L"PRESIONE 'Q' PARA SCOREBOARD", FG_WHITE);//exit mode
+		DrawString(10, 60, L"PRESIONE 'C' PARA CREDITOS", FG_WHITE);//creditos
+		DrawString(10, 70, L"PRESIONE 'ESC' PARA SALIR", FG_WHITE);//exit mode
 
 		//letter for activating hanoiRecursive
 		if (m_keys['R'].bReleased)
 		{
 			SetUpRecursiveHanoi(diskAmount);
+			mode = 1;
 			return true;
 		}
 
@@ -156,16 +164,27 @@ public:
 		if (m_keys['S'].bReleased)
 		{
 			SetUpStackHanoi(diskAmount);
-			game1 = false;
+			mode = 2;
 			return true;
 		}
-		//letter for SCORES
+		//letter for credits
+		if (m_keys['C'].bReleased)
+		{
+			mode = 3;
+			return true;
+		}
 
+		//letter for SCORES
+		if (m_keys['Q'].bReleased)
+		{
+			mode = 4;
+			return true;
+		}
 		//letter for Exit
 		if (m_keys[VK_ESCAPE].bReleased)
 		{
-			state = EXIT;
-			//return true;
+			mode = 5;
+			return true;
 		}
 
 		return false;
@@ -190,7 +209,7 @@ public:
 
 
 
-	bool DrawRecursiveHanoiGame(float deltaTime)
+	void DrawRecursiveHanoiGame(float deltaTime)
 	{
 		static float timer = 0;
 		static int nmove = 0;
@@ -219,19 +238,21 @@ public:
 		if (m_keys['M'].bReleased)
 		{
 			ClearVectors();
-			return true;
+			state = START;
 		}
 
 		//end app
 		else if (m_keys[VK_ESCAPE].bReleased)
 		{
+			ClearVectors();
 			state = EXIT;
-			return true;
 		}
 
-		return false;
-
-
+		else if (m_keys['C'].bReleased)
+		{
+			ClearVectors();
+			state = CREDITS;
+		}
 	}
 
 
@@ -296,7 +317,7 @@ public:
 
 	}
 
-	bool DrawStackHanoiGame()
+	void DrawStackHanoiGame()
 	{
 		//controls
 		CheckMouseInput();
@@ -308,17 +329,21 @@ public:
 		if (m_keys['M'].bReleased)
 		{
 			ClearVectors();
-			return true;
+			state = START;
 		}
 
 		//end app
 		else if (m_keys[VK_ESCAPE].bReleased)
 		{
+			ClearVectors();
 			state = EXIT;
-			return true;
 		}
 
-		return false;
+		//win the game
+		if (towers[2].size() == diskAmount)
+		{
+			state = SCORES;
+		}
 
 	}
 
@@ -364,7 +389,31 @@ public:
 	
 	}
 
+	void DrawScores()
+	{
+		Fill(0,0, ScreenWidth(), ScreenHeight(), ' ', BG_BLACK);
 
+
+		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 5, L"CONGRATULATIONS YOU WIN!!!", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 10, L"INSERT YOUR NAME: ", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 15, L"MENU, PRESS 'M'", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 20, L"EXIT, PRESS 'ESC'", FG_DARK_YELLOW);
+
+		//volver a menu
+		if (m_keys['M'].bReleased)
+		{
+			ClearVectors();
+			state = START;
+		}
+		//end app
+		else if (m_keys[VK_ESCAPE].bReleased)
+		{
+			ClearVectors();
+			state = EXIT;
+		}		
+	}
+
+	
 	void ClearVectors()
 	{
 		moveset.clear();
@@ -373,6 +422,27 @@ public:
 			towers[i].clear();
 		}
 	}
+
+	void DrawCredits()
+	{
+		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"CREDITS:", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight()/2, L"SPECIAL THANKS TO ZLEAPINGBEAR, WITHOUT YOU THIS PROYECT WONT BE COMPLETED", FG_WHITE);
+
+		if (m_keys['M'].bReleased)
+		{
+			ClearVectors();
+			state = START;
+		}
+		//end app
+		else if (m_keys[VK_ESCAPE].bReleased)
+		{
+			ClearVectors();
+			state = EXIT;
+		}
+
+	}
+
 };
 
 
