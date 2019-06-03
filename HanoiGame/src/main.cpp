@@ -24,13 +24,12 @@
 #include<string>
 #include"olcConsoleGameEngine.h"
 
-enum STATES {START, RECURSIVEGAME, STACKGAME, SCORES, CREDITS, EXIT};
+enum STATES {START, RECURSIVEGAME, STACKGAME, STACKAUTO, SCORES, CREDITS, EXIT};
 
 struct move {
 	move(int _from, int _to) {
 		from = _from;
 		to = _to;
-
 	}
 	int from, to;
 };
@@ -43,6 +42,7 @@ struct vecContainer
 	void addMove(move old) {
 		_moves.push_back(move(old.from, old.to));
 	}
+
 	std::vector<move> getMoves() { return _moves; }
 	int getSize() { return _moves.size(); }
 };
@@ -68,9 +68,13 @@ public:
 	STATES state = START;
 	std::vector<int> towers[3];
 	int diskAmount;
-	std::wstring playerName;
-	int mode;//0: nada 1: activa recursividad 2:stack 3:creditos 4:scoreboard 5:salir
-	int mouseHolder = 0;//the disk size pickup by the mouse
+	
+	std::vector<std::wstring> players;
+	
+	int mode;//0: start 1: activa recursividad 2:stack 3: stackAuto 4:creditos 5:scoreboard 6:salir
+	int mouseHolder;//the disk size pickup by the mouse
+	float timeMarker;
+	
 	mainEngine()
 	{
 		m_sAppName = L"LOS JUEGOS DE TORRE DE HANOI";
@@ -79,6 +83,8 @@ public:
 	bool OnUserCreate()
 	{
 		mode = 0;
+		timeMarker = 0.0f;
+		mouseHolder = 0;
 		return true;
 	}
 
@@ -94,30 +100,36 @@ public:
 				else if (mode == 2)
 					state = STACKGAME;
 				else if (mode == 3)
-					state = CREDITS;
+					state = STACKAUTO;
 				else if (mode == 4)
-					state = SCORES;
+					state = CREDITS;
 				else if (mode == 5)
+					state = SCORES;
+				else if (mode == 6)
 					state = EXIT;
 			}
 		}
-		if (state == RECURSIVEGAME)
+		else if (state == RECURSIVEGAME)
 		{
 			DrawRecursiveHanoiGame(fElapsedTime);
 		}
-		if (state == STACKGAME)
+		else if (state == STACKGAME)
 		{
 			DrawStackHanoiGame();
 		}
-		if (state == SCORES)
+		else if (state == STACKAUTO)
+		{
+			DrawStackAuto(fElapsedTime);
+		}
+		else if (state == SCORES)
 		{
 			DrawScores();
 		}
-		if (state == CREDITS)
+		else if (state == CREDITS)
 		{
 			DrawCredits();
 		}
-		if (state == EXIT)
+		else if (state == EXIT)
 			return false;
 
 		return true;
@@ -135,8 +147,8 @@ public:
 		DrawString(10, 25, L"SELECCIONE LA CANTIDAD DE DISCOS", FG_WHITE);
 
 		//disks selection
-		if (diskAmount < 2 || diskAmount > 8)
-			diskAmount = 2;
+		if (diskAmount < 3 || diskAmount > 8)
+			diskAmount = 3;
 
 		if (m_keys[VK_UP].bReleased)
 			diskAmount++;
@@ -146,11 +158,12 @@ public:
 		std::wstring diskNumber = std::to_wstring(diskAmount);
 		DrawString(45, 25, diskNumber, FG_WHITE);
 
-		DrawString(10, 30, L"PRESIONE 'R' PARA HANOIRECURSIVO", FG_WHITE);//press R for recursiveHanoi
-		DrawString(10, 40, L"PRESIONE 'S' PARA HANOISTACK", FG_WHITE);//press S for hanoiStack
-		DrawString(10, 50, L"PRESIONE 'Q' PARA SCOREBOARD", FG_WHITE);//exit mode
-		DrawString(10, 60, L"PRESIONE 'C' PARA CREDITOS", FG_WHITE);//creditos
-		DrawString(10, 70, L"PRESIONE 'ESC' PARA SALIR", FG_WHITE);//exit mode
+		DrawString(10, 30, L"PRESIONE 'R' PARA HANOI_RECURSIVO", FG_WHITE);//press R for recursiveHanoi
+		DrawString(10, 40, L"PRESIONE 'S' PARA HANOI_STACK MANUAL", FG_WHITE);//press S for hanoiStack
+		DrawString(10, 50, L"PRESIONE 'A' PARA HANOI_STACK AUTO", FG_WHITE);
+		DrawString(10, 60, L"PRESIONE 'Q' PARA SCOREBOARD", FG_WHITE);//exit mode
+		DrawString(10, 70, L"PRESIONE 'C' PARA CREDITOS", FG_WHITE);//creditos
+		DrawString(10, 80, L"PRESIONE 'ESC' PARA SALIR", FG_WHITE);//exit mode
 
 		//letter for activating hanoiRecursive
 		if (m_keys['R'].bReleased)
@@ -160,30 +173,39 @@ public:
 			return true;
 		}
 
-		//letter for activating hanoiStack
+		//letter for activating hanoiStack manual
 		if (m_keys['S'].bReleased)
 		{
 			SetUpStackHanoi(diskAmount);
 			mode = 2;
 			return true;
 		}
+
+		//letter for activating hanoiStack auto 
+		if (m_keys['A'].bReleased)
+		{
+			SetUpStackAutoHanoiGame(diskAmount);
+			mode = 3;
+			return true;
+		}
+
 		//letter for credits
 		if (m_keys['C'].bReleased)
 		{
-			mode = 3;
+			mode = 4;
 			return true;
 		}
 
 		//letter for SCORES
 		if (m_keys['Q'].bReleased)
 		{
-			mode = 4;
+			mode = 5;
 			return true;
 		}
 		//letter for Exit
 		if (m_keys[VK_ESCAPE].bReleased)
 		{
-			mode = 5;
+			mode = 6;
 			return true;
 		}
 
@@ -197,12 +219,12 @@ public:
 		int towerC = 2;
 		HanoiRecursion(disks, towerA, towerC, towerB);
 
-
+		//carga moveset con todos los mov. generados en el algoritmo
 		for (int i = 0; i < moveContainer.getSize(); i++)
 		{
 			moveset.push_back(move(moveContainer._moves.at(i).from, moveContainer._moves.at(i).to));
 		}
-
+		//carga la torre 0 con los discos
 		for (int i = 0; i < disks; i++)
 			towers[0].push_back(disks - i);
 	}
@@ -222,7 +244,7 @@ public:
 			{
 				towers[moveset[nmove].to].push_back(towers[moveset[nmove].from].back());
 				towers[moveset[nmove].from].pop_back();
-
+				
 				towers[moveset[nmove].from].shrink_to_fit();
 				towers[moveset[nmove].to].shrink_to_fit();
 
@@ -284,8 +306,9 @@ public:
 							std::wstring mouseContent = std::to_wstring(mouseHolder);
 							std::wstring towerContent = std::to_wstring(i);
 
-							DrawString(15, 25, mouseContent, FG_WHITE);
-							DrawString(15, 30, towerContent, FG_WHITE);
+							DrawString(20, 25, L"MOVER DISCO", FG_WHITE);
+							DrawString(20, 30, L"A TORRE", FG_WHITE);
+
 							mouseHolder = 0;
 						}
 					}
@@ -347,6 +370,61 @@ public:
 
 	}
 
+	void SetUpStackAutoHanoiGame(int disks)
+	{
+		HanoiRecursion(disks, 0, 2, 1);
+
+		//carga moveset con todos los mov. generados en el algoritmo
+		for (int i = 0; i < moveContainer.getSize(); i++)
+		{
+			moveset.push_back(move(moveContainer._moves.at(i).from, moveContainer._moves.at(i).to));
+		}
+		//carga la torre 0 con los discos
+		for (int i = 0; i < disks; i++)
+			towers[0].push_back(disks - i);
+	}
+
+	void DrawStackAuto(float deltaTime)
+	{
+		static float timer = 0;
+		static int nmove = 0;
+		timer += deltaTime;
+
+		if (timer > 1.0)
+		{
+			timer -= 1.0;
+			if (nmove < moveset.size())
+			{
+				towers[moveset[nmove].to].push_back(towers[moveset[nmove].from].back());
+				towers[moveset[nmove].from].pop_back();
+
+				towers[moveset[nmove].from].shrink_to_fit();
+				towers[moveset[nmove].to].shrink_to_fit();
+
+				nmove++;
+			}
+		}
+
+		//Graphics	
+		DrawTowers(BG_DARK_MAGENTA, BG_DARK_GREY);
+
+
+		//menu
+		if (m_keys['M'].bReleased)
+		{
+			ClearVectors();
+			state = START;
+		}
+
+		//end app
+		else if (m_keys[VK_ESCAPE].bReleased)
+		{
+			ClearVectors();
+			state = EXIT;
+		}
+
+	}
+
 	void DrawTowers(short background, short disksColor)
 	{
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', background);
@@ -371,7 +449,6 @@ public:
 
 		for (int i = 0; i < 3; i++)
 		{
-
 			//si aun hay movimientos en las torres
 			if (towers[i].size() > 0)
 			{
@@ -394,10 +471,10 @@ public:
 		Fill(0,0, ScreenWidth(), ScreenHeight(), ' ', BG_BLACK);
 
 
-		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 5, L"CONGRATULATIONS YOU WIN!!!", FG_DARK_YELLOW);
-		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 10, L"INSERT YOUR NAME: ", FG_DARK_YELLOW);
-		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 15, L"MENU, PRESS 'M'", FG_DARK_YELLOW);
-		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 20, L"EXIT, PRESS 'ESC'", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 5, L"FELICIDADES HAS GANADO!!!", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 10, L"INSERTE SU NOMBRE: ", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 15, L"MENU, PRESIONA 'M'", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 20, L"SALIDA, PRESIONA 'ESC'", FG_DARK_YELLOW);
 
 		//volver a menu
 		if (m_keys['M'].bReleased)
@@ -426,8 +503,11 @@ public:
 	void DrawCredits()
 	{
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
-		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"CREDITS:", FG_WHITE);
-		DrawString(ScreenWidth() / 2 - 30, ScreenHeight()/2, L"SPECIAL THANKS TO ZLEAPINGBEAR, WITHOUT YOU THIS PROYECT WONT BE COMPLETED", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"DESARROLLADO POR:", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2, L"XAVIER LAMELA(SIR_ARTHUR_DAYNE)", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 + 10, L"CLYDE 'LA VOZ' HARBIN", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 + 20, L"LUIS 'EL DEMENTOR' CHAVEZ", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight()/2 + 30, L"SPECIAL THANKS TO ZLEAPINGBEAR, WITHOUT YOU THIS PROYECT WONT BE COMPLETED", FG_WHITE);
 
 		if (m_keys['M'].bReleased)
 		{
@@ -456,7 +536,9 @@ int main()
 		const int pixelSize = 10;
 		if (game.ConstructConsole(w, h, pixelSize, pixelSize))
 			game.Start();
-		
+		else 
+			std::cout << "ERROR DE CARGA\n";
+
 		return 0;
 	
 }
