@@ -34,21 +34,7 @@ struct move {
 	}
 	int from, to;
 };
-
-struct vecContainer 
-{
-	vecContainer() {}
-	std::vector<move> _moves;
-
-	void addMove(move old) {
-		_moves.push_back(move(old.from, old.to));
-	}
-
-	std::vector<move> getMoves() { return _moves; }
-	int getSize() { return _moves.size(); }
-};
-
-vecContainer moveContainer;
+std::vector<move> moveset;
 
 void HanoiRecursion(int nDisks, int first, int middle, int last)
 {
@@ -56,12 +42,12 @@ void HanoiRecursion(int nDisks, int first, int middle, int last)
 	if (nDisks > 0)
 	{
 		HanoiRecursion(nDisks - 1, first, last, middle);
-		moveContainer.addMove(move(first, middle));
+		moveset.push_back(move(first, middle));
+
 		HanoiRecursion(nDisks - 1, last, middle, first);
 	}
 }
 
-std::vector<move> moveset;
 
 
 class mainEngine : public olcConsoleGameEngine {
@@ -236,12 +222,7 @@ public:
 		int towerC = 2;
 		HanoiRecursion(disks, towerA, towerC, towerB);
 
-		//carga moveset con todos los mov. generados en el algoritmo
-		for (int i = 0; i < moveContainer.getSize(); i++)
-		{
-			moveset.push_back(move(moveContainer._moves.at(i).from, moveContainer._moves.at(i).to));
-		}
-		//carga la torre 0 con los discos
+		
 		for (int i = 0; i < disks; i++)
 			towers[0].push_back(disks - i);
 	}
@@ -391,11 +372,7 @@ public:
 	{
 		HanoiRecursion(disks, 0, 2, 1);
 
-		//carga moveset con todos los mov. generados en el algoritmo
-		for (int i = 0; i < moveContainer.getSize(); i++)
-		{
-			moveset.push_back(move(moveContainer._moves.at(i).from, moveContainer._moves.at(i).to));
-		}
+		
 		//carga la torre 0 con los discos
 		for (int i = 0; i < disks; i++)
 			towers[0].push_back(disks - i);
