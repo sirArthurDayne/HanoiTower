@@ -9,6 +9,7 @@
 	1. Only one disk can move at the time.
 	2. The Disk removed has to be place in a tower.
 	3. A big Disk cannot be placed on top a smaller disk.
+
 	  -             |            |
 	-----			|			 |
   ---------			|			 |
@@ -27,7 +28,7 @@
 enum STATES {START, RECURSIVEGAME, STACKGAME, STACKAUTO, SCORES, CREDITS, EXIT};
 
 struct move {
-	move(int _from, int _to) {
+	move(int _from, int _to) {//int 
 		from = _from;
 		to = _to;
 	}
@@ -69,11 +70,13 @@ public:
 	std::vector<int> towers[3];
 	int diskAmount;
 	
-	std::vector<std::wstring> players;
 	
 	int mode;//0: start 1: activa recursividad 2:stack 3: stackAuto 4:creditos 5:scoreboard 6:salir
 	int mouseHolder;//the disk size pickup by the mouse
 	float timeMarker;
+	
+	std::vector<std::wstring> players;
+	bool gettingName;
 	
 	mainEngine()
 	{
@@ -85,6 +88,7 @@ public:
 		mode = 0;
 		timeMarker = 0.0f;
 		mouseHolder = 0;
+		gettingName = false;
 		return true;
 	}
 
@@ -124,6 +128,19 @@ public:
 		else if (state == SCORES)
 		{
 			DrawScores();
+			if (gettingName)//TODO 
+			{
+				GetUsersName(fElapsedTime);
+			}
+			else
+			{
+				int i = 1;
+				for (auto n : players)
+				{
+					DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 + (i * 5), n, BG_DARK_YELLOW);
+					i++;
+				}
+			}
 		}
 		else if (state == CREDITS)
 		{
@@ -139,7 +156,7 @@ public:
 	bool GameStartMenu()
 	{
 		//background
-		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
+		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_GREY);
 
 		//title 
 		DrawString(ScreenWidth() / 2 - 20, 10, L"LOS JUEGOS DE HANOI", FG_WHITE);
@@ -147,8 +164,8 @@ public:
 		DrawString(10, 25, L"SELECCIONE LA CANTIDAD DE DISCOS", FG_WHITE);
 
 		//disks selection
-		if (diskAmount < 3 || diskAmount > 8)
-			diskAmount = 3;
+		if (diskAmount < 2 || diskAmount > 8)
+			diskAmount = 2;
 
 		if (m_keys[VK_UP].bReleased)
 			diskAmount++;
@@ -471,33 +488,42 @@ public:
 		Fill(0,0, ScreenWidth(), ScreenHeight(), ' ', BG_BLACK);
 
 
-		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 5, L"FELICIDADES HAS GANADO!!!", FG_DARK_YELLOW);
-		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 10, L"INSERTE SU NOMBRE: ", FG_DARK_YELLOW);
-		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 15, L"MENU, PRESIONA 'M'", FG_DARK_YELLOW);
-		DrawString(ScreenWidth() /2 - 10, ScreenHeight()/2 + 20, L"SALIDA, PRESIONA 'ESC'", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 15, ScreenHeight()/2 - 30, L"FELICIDADES HAS GANADO!!!", FG_DARK_YELLOW);
+		
+		DrawString(ScreenWidth() /2 - 30, ScreenHeight()/2 - 5, L"INSERTE SU NOMBRE: PRESIONE 'N' ", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 30, ScreenHeight()/2, L"TABLA DE PUNTOS", FG_DARK_YELLOW);
+		
+		DrawString(ScreenWidth() /2 + 20, ScreenHeight()/2 + 30, L"MENU, PRESIONA 'M'", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 + 20, ScreenHeight()/2 + 35, L"SALIDA, PRESIONA 'ESC'", FG_DARK_YELLOW);
 
+
+		//name input
+		if (gettingName == false && m_keys['N'].bReleased)
+		{
+			gettingName = true;
+		}
+		
 		//volver a menu
-		if (m_keys['M'].bReleased)
+		if (gettingName == false && m_keys['M'].bReleased)
 		{
 			ClearVectors();
 			state = START;
 		}
 		//end app
-		else if (m_keys[VK_ESCAPE].bReleased)
+		else if (gettingName == false && m_keys[VK_ESCAPE].bReleased)
 		{
 			ClearVectors();
 			state = EXIT;
 		}		
 	}
 
-	
 	void ClearVectors()
 	{
 		moveset.clear();
+	
 		for (int i = 0; i < 3; i++)
-		{
 			towers[i].clear();
-		}
+	
 	}
 
 	void DrawCredits()
@@ -505,8 +531,7 @@ public:
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
 		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"DESARROLLADO POR:", FG_WHITE);
 		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2, L"XAVIER LAMELA(SIR_ARTHUR_DAYNE)", FG_WHITE);
-		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 + 10, L"CLYDE 'LA VOZ' HARBIN", FG_WHITE);
-		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 + 20, L"LUIS 'EL DEMENTOR' CHAVEZ", FG_WHITE);
+		
 		DrawString(ScreenWidth() / 2 - 30, ScreenHeight()/2 + 30, L"SPECIAL THANKS TO ZLEAPINGBEAR, WITHOUT YOU THIS PROYECT WONT BE COMPLETED", FG_WHITE);
 
 		if (m_keys['M'].bReleased)
@@ -523,6 +548,37 @@ public:
 
 	}
 
+
+	void GetUsersName(float deltaTime)
+	{
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"**INSERTANDO**...", FG_DARK_YELLOW);
+		static std::wstring name = L"";
+		static float keytimer = 0;
+		
+		keytimer += deltaTime;
+
+		if (keytimer > 0.1)
+		{
+			for (int i = 0; i < 128; i++)
+			{
+				if (m_keys[i].bReleased)
+				{
+					name.push_back(i);
+					keytimer = 0;
+				}
+			}
+		
+		}
+		
+		if (m_keys[VK_RETURN].bReleased)//out of input SUB-state
+		{
+			players.push_back(name);
+			name = L"";
+			gettingName = false;
+		}
+
+	}
+
 };
 
 
@@ -532,7 +588,7 @@ int main()
 		mainEngine game;
 		const int w = 120;
 		const int h = 100;
-
+		
 		const int pixelSize = 10;
 		if (game.ConstructConsole(w, h, pixelSize, pixelSize))
 			game.Start();
