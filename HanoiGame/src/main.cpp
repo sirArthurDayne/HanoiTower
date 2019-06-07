@@ -28,7 +28,7 @@
 enum STATES {START, RECURSIVEGAME, STACKGAME, STACKAUTO, SCORES, CREDITS, EXIT};
 
 struct move {
-	move(int _from, int _to) {//int 
+	move(int _from, int _to) {
 		from = _from;
 		to = _to;
 	}
@@ -160,12 +160,13 @@ public:
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_CYAN);
 
 		
-		DrawString(ScreenWidth() / 2 - 20, 10, L"LOS JUEGOS DE HANOI", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 20, 10, L"LOS JUEGOS DE HANOI / THE TOWER OF HANOI", FG_WHITE);
 
-		DrawString(10, 25, L"SELECCIONE LA CANTIDAD DE DISCOS", FG_WHITE);
+		DrawString(10, 25, L"SELECT DISK AMOUNT:", FG_WHITE);
+		DrawString(10, 30, L"SELECCIONE LA CANTIDAD DE DISCOS:", FG_WHITE);
 
-		if (diskAmount < 2 || diskAmount > 8)
-			diskAmount = 2;
+		if (diskAmount < 3 || diskAmount > 8)
+			diskAmount = 3;
 
 		if (m_keys[VK_UP].bReleased)
 			diskAmount++;
@@ -175,12 +176,12 @@ public:
 		std::wstring diskNumber = std::to_wstring(diskAmount);
 		DrawString(45, 25, diskNumber, FG_WHITE);
 
-		DrawString(10, 30, L"PRESIONE 'R' PARA HANOI_RECURSIVO", FG_WHITE);
-		DrawString(10, 40, L"PRESIONE 'S' PARA HANOI_STACK MANUAL", FG_WHITE);
-		DrawString(10, 50, L"PRESIONE 'A' PARA HANOI_STACK AUTO", FG_WHITE);
-		DrawString(10, 60, L"PRESIONE 'Q' PARA TABLA", FG_WHITE);
-		DrawString(10, 70, L"PRESIONE 'C' PARA CREDITOS", FG_WHITE);
-		DrawString(10, 80, L"PRESIONE 'ESC' PARA SALIR", FG_WHITE);
+		DrawString(10, 30, L"PRESS 'R' FOR HANOI_RECURSIVO", FG_WHITE);
+		DrawString(10, 40, L"PRESS 'S' FOR HANOI_STACK MANUAL", FG_WHITE);
+		DrawString(10, 50, L"PRESS 'A' FOR HANOI_STACK AUTO", FG_WHITE);
+		DrawString(10, 60, L"PRESS 'Q' FOR SCOREBOARD/TABLA", FG_WHITE);
+		DrawString(10, 70, L"PRESS 'C' FOR CREDITS/CREDITOS", FG_WHITE);
+		DrawString(10, 80, L"PRESS 'ESC' FOR EXIT/SALIR", FG_WHITE);
 
 		if (m_keys['R'].bReleased)
 		{
@@ -401,7 +402,7 @@ public:
 		}
 
 		//Graficas	
-		DrawTowers(BG_DARK_BLUE, BG_DARK_GREY);
+		DrawTowers(BG_BLACK, BG_DARK_GREY);
 
 
 		//menu
@@ -424,9 +425,9 @@ public:
 	{
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', background);
 		//torres texto
-		DrawString(18 + (0 * 40), 90 - 30, L"TORRE 0", FG_DARK_BLUE);
-		DrawString(18 + (1 * 40), 90 - 30, L"TORRE 1", FG_DARK_GREEN);
-		DrawString(18 + (2 * 40), 90 - 30, L"TORRE 2", FG_DARK_RED);
+		DrawString(18 + (0 * 40), 90 - 30, L"TORRE/TOWER 0", FG_DARK_BLUE);
+		DrawString(18 + (1 * 40), 90 - 30, L"TORRE/TOWER 1", FG_DARK_GREEN);
+		DrawString(18 + (2 * 40), 90 - 30, L"TORRE/TOWER 2", FG_DARK_RED);
 
 		//dibujar torres en pantalla
 		for (int i = 0; i < 3; i++)
@@ -459,21 +460,25 @@ public:
 					if (state == RECURSIVEGAME)
 					{
 						DrawString(ScreenWidth() / 2 - 20, 5, L"HANOI RECURSIVO", FG_DARK_GREEN);
-						DrawString(20,10, L"TOTAL DE MOVIMIENTOS: ", FG_WHITE);
+						DrawString(20,10, L"TOTAL OF MOVES: ", FG_WHITE);
+						DrawString(20,14, L"TOTAL DE MOVIMIENTOS: ", FG_WHITE);
 						DrawString(45,10, std::to_wstring(moveset.size()), FG_WHITE);
 					}
 					else if (state == STACKAUTO)
 					{
 						DrawString(ScreenWidth() / 2 - 20, 5, L"HANOI STACKAUTO", FG_DARK_BLUE);
-						DrawString(20, 10, L"TOTAL DE MOVIMIENTOS: ", FG_WHITE);
+						DrawString(20, 10, L"TOTAL OF MOVES: ", FG_WHITE);
+						DrawString(20, 14, L"TOTAL DE MOVIMIENTOS: ", FG_WHITE);
 						DrawString(45, 10, std::to_wstring(moveset.size()), FG_WHITE);
 					}
 					else if (state == STACKGAME)
 					{
-						DrawString(ScreenWidth() / 2 - 20, 5, L"HANOI JUGABLE", FG_DARK_YELLOW);
+						DrawString(ScreenWidth() / 2 - 20, 5, L"HANOI JUGABLE/HANOI PLAYABLE", FG_DARK_YELLOW);
 						DrawString(25, 10, L"MOVIMIENTOS:", FG_DARK_YELLOW);
+						DrawString(25, 14, L"MOVES:", FG_DARK_YELLOW);
 						DrawString(40, 10, std::to_wstring(movesTotal), FG_DARK_YELLOW);
 						DrawString(25, 20, L"PUNTOS:", FG_DARK_YELLOW);
+						DrawString(25, 24, L"POINTS:", FG_DARK_YELLOW);
 						DrawString(35, 20, std::to_wstring(points), FG_DARK_YELLOW);
 					}
 				}
@@ -485,17 +490,16 @@ public:
 
 	void DrawScores()
 	{
-		Fill(0,0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
+		Fill(0,0, ScreenWidth(), ScreenHeight(), ' ', BG_BLACK);
 
-		DrawString(ScreenWidth() /2 - 15, ScreenHeight()/2 - 30, L"FELICIDADES HAS GANADO!!!", FG_WHITE);
+		DrawString(ScreenWidth() /2 - 15, ScreenHeight()/2 - 30, L"CONGRATS, YOU WIN!!!", FG_DARK_YELLOW);
 		
-		DrawString(ScreenWidth() /2 - 30, ScreenHeight()/2 - 5, L"INSERTE SU NOMBRE Y FECHA DEL SISTEMA: PRESIONE 'N' ", FG_WHITE);
-		DrawString(ScreenWidth() /2 - 30, ScreenHeight()/2, L"TABLA DE PUNTOS", FG_WHITE);
+		DrawString(ScreenWidth() /2 - 30, ScreenHeight()/2 - 5, L"INSERT YOUR NAME Y DATE OF THE SYSTEM: PRESS 'N' ", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 - 30, ScreenHeight()/2, L"SCOREBOARD", FG_DARK_YELLOW);
 		
-		DrawString(ScreenWidth() /2 + 20, ScreenHeight()/2 + 30, L"MENU, PRESIONA 'M'", FG_WHITE);
-		DrawString(ScreenWidth() /2 + 20, ScreenHeight()/2 + 35, L"SALIDA, PRESIONA 'ESC'", FG_WHITE);
+		DrawString(ScreenWidth() /2 + 20, ScreenHeight()/2 + 30, L"MENU, PRESS 'M'", FG_DARK_YELLOW);
+		DrawString(ScreenWidth() /2 + 20, ScreenHeight()/2 + 35, L"EXIT, PRESS 'ESC'", FG_DARK_YELLOW);
 
-		
 		//name input
 		if (gettingName == false && m_keys['N'].bReleased)
 		{
@@ -534,11 +538,10 @@ public:
 	void DrawCredits()
 	{
 		Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
-		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"DESARROLLADO POR:", FG_WHITE);
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"DEVELOP BY:", FG_WHITE);
 		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2, L"XAVIER LAMELA(SIR_ARTHUR_DAYNE)", FG_WHITE);
-		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 + 5, L"CLYDE 'LA VOZ' HARBIN", FG_WHITE);
-		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 + 10, L"LUIS 'EL DEMENTOR' CHAVEZ", FG_WHITE);
-		
+		DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 + 15, L"SPECIAL THANKS TO ZLEAPINGBEAR, WITHOUT YOU THIS PROYECT WONT BE COMPLETED", FG_WHITE);
+
 		
 		if (m_keys['M'].bReleased)
 		{
