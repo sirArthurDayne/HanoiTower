@@ -26,7 +26,7 @@
 
 int main()
 {	
-		mainEngine game;
+		HanoiGame game;
 		const int w = 120;
 		const int h = 100;
 		

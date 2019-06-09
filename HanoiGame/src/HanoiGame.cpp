@@ -22,12 +22,12 @@ void HanoiRecursion(int nDisks, int first, int end, int middle)
 	}
 }
 
-mainEngine::mainEngine()
+HanoiGame::HanoiGame()
 {
 	m_sAppName = L"LOS JUEGOS DE TORRE DE HANOI / HANOI TOWER";
 }
 
-bool mainEngine::OnUserCreate()
+bool HanoiGame::OnUserCreate()
 {
 	mode = 0;
 	mouseHolder = 0;
@@ -37,7 +37,7 @@ bool mainEngine::OnUserCreate()
 	return true;
 }
 
-bool mainEngine::OnUserUpdate(float fElapsedTime)
+bool HanoiGame::OnUserUpdate(float fElapsedTime)
 {
 	if (state == START)
 	{
@@ -103,7 +103,7 @@ bool mainEngine::OnUserUpdate(float fElapsedTime)
 	return true;
 }
 
-bool mainEngine::GameStartMenu()
+bool HanoiGame::GameStartMenu()
 {
 	//fondo
 	Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_CYAN);
@@ -134,6 +134,7 @@ bool mainEngine::GameStartMenu()
 
 	if (m_keys['R'].bReleased)
 	{
+		ClearVectors();
 		SetUpRecursiveHanoi(diskAmount);
 		mode = 1;
 		return true;
@@ -148,6 +149,7 @@ bool mainEngine::GameStartMenu()
 
 	if (m_keys['A'].bReleased)
 	{
+		ClearVectors();
 		SetUpStackAutoHanoiGame(diskAmount);
 		mode = 3;
 		return true;
@@ -173,7 +175,7 @@ bool mainEngine::GameStartMenu()
 	return false;
 }
 
-void mainEngine::SetUpRecursiveHanoi(int disks)
+void HanoiGame::SetUpRecursiveHanoi(int disks)
 {
 	int towerA = 0;
 	int towerB = 1;
@@ -186,7 +188,7 @@ void mainEngine::SetUpRecursiveHanoi(int disks)
 		towers[0].push_back(disks - i);
 }
 
-void mainEngine::DrawRecursiveHanoiGame(float deltaTime)
+void HanoiGame::DrawRecursiveHanoiGame(float deltaTime)
 {
 	static float timer = 0;
 	static int nmove = 0;
@@ -227,21 +229,17 @@ void mainEngine::DrawRecursiveHanoiGame(float deltaTime)
 		state = EXIT;
 	}
 
-	else if (m_keys['C'].bReleased)
-	{
-		ClearVectors();
-		state = CREDITS;
-	}
+	
 }
 
-void mainEngine::SetUpStackHanoi(int disks)
+void HanoiGame::SetUpStackHanoi(int disks)
 {
 	//insert disks on tower 0
 	for (int i = 0; i < disks; i++)
 		towers[0].push_back(disks - i);
 }
 
-void mainEngine::CheckMouseInput()
+void HanoiGame::CheckMouseInput()
 {
 	if (GetMouse(0).bReleased)
 	{
@@ -287,7 +285,7 @@ void mainEngine::CheckMouseInput()
 
 }
 
-void mainEngine::DrawStackHanoiGame()
+void HanoiGame::DrawStackHanoiGame()
 {
 	//controles
 	CheckMouseInput();
@@ -319,7 +317,7 @@ void mainEngine::DrawStackHanoiGame()
 
 }
 
-void mainEngine::SetUpStackAutoHanoiGame(int disks)
+void HanoiGame::SetUpStackAutoHanoiGame(int disks)
 {
 	HanoiRecursion(disks, 0, 2, 1);
 
@@ -328,7 +326,7 @@ void mainEngine::SetUpStackAutoHanoiGame(int disks)
 		towers[0].push_back(disks - i);
 }
 
-void mainEngine::DrawStackAuto(float deltaTime)
+void HanoiGame::DrawStackAuto(float deltaTime)
 {
 	static float timer = 0;
 	static int nmove = 0;
@@ -369,7 +367,7 @@ void mainEngine::DrawStackAuto(float deltaTime)
 
 }
 
-void mainEngine::DrawTowers(short background, short disksColor)
+void HanoiGame::DrawTowers(short background, short disksColor)
 {
 	Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', background);
 	//torres texto
@@ -436,7 +434,7 @@ void mainEngine::DrawTowers(short background, short disksColor)
 
 }
 
-void mainEngine::DrawScores()
+void HanoiGame::DrawScores()
 {
 	Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_BLACK);
 
@@ -471,7 +469,7 @@ void mainEngine::DrawScores()
 	}
 }
 
-void mainEngine::ClearVectors()
+void HanoiGame::ClearVectors()
 {
 	moveset.shrink_to_fit();
 	moveset.clear();
@@ -483,7 +481,7 @@ void mainEngine::ClearVectors()
 
 }
 
-void mainEngine::DrawCredits()
+void HanoiGame::DrawCredits()
 {
 	Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
 	DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"DEVELOP BY:", FG_WHITE);
@@ -505,7 +503,7 @@ void mainEngine::DrawCredits()
 
 }
 
-void mainEngine::GetUsersName(float deltaTime)
+void HanoiGame::GetUsersName(float deltaTime)
 {
 	DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"**INSERTANDO**...", FG_DARK_YELLOW);
 	static std::wstring name = L"";
@@ -542,7 +540,7 @@ void mainEngine::GetUsersName(float deltaTime)
 
 }
 
-void mainEngine::PointsSystem(int moves)
+void HanoiGame::PointsSystem(int moves)
 {
 	if (points > 0)
 	{
@@ -574,7 +572,7 @@ void mainEngine::PointsSystem(int moves)
 	else points = 0;
 }
 
-void mainEngine::SortLists()
+void HanoiGame::SortLists()
 {
 	for (int i = 0; i < pointsplayers.size() - 1; i++)
 	{

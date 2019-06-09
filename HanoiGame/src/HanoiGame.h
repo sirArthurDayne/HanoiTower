@@ -3,7 +3,7 @@
 
 enum STATES { START, RECURSIVEGAME, STACKGAME, STACKAUTO, SCORES, CREDITS, EXIT };
 
-class mainEngine : public olcConsoleGameEngineOOP {
+class HanoiGame : public olcConsoleGameEngineOOP {
 public:
 	//set machine
 	STATES state = START;
@@ -24,7 +24,7 @@ public:
 	int points;
 
 public:
-	mainEngine();
+	HanoiGame();
 
 	bool OnUserCreate() override;
 
