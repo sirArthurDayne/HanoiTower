@@ -23,5 +23,8 @@
     <ClInclude Include="src\olcConsoleGameEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\HanoiGame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

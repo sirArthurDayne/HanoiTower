@@ -22,6 +22,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\HanoiGame.h" />
     <ClInclude Include="src\olcConsoleGameEngine.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
