@@ -21,7 +21,7 @@
  */
 #include"HanoiGame.h"
 
-#include<iostream>
+
 
 
 int main()
@@ -33,8 +33,7 @@ int main()
 		const int pixelSize = 10;
 		if (game.ConstructConsole(w, h, pixelSize, pixelSize))
 			game.Start();
-		else 
-			std::cout << "ERROR DE CARGA\n";
+		
 
 		return 0;
 	

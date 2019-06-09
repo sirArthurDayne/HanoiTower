@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\HanoiGame.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\olcConsoleGameEngineOOP.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\HanoiGame.h" />
-    <ClInclude Include="src\olcConsoleGameEngine.h" />
+    <ClInclude Include="src\olcConsoleGameEngineOOP.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

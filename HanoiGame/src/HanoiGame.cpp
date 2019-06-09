@@ -1,11 +1,33 @@
 #include"HanoiGame.h"
 
-HanoiGame::HanoiGame()
+struct move {
+	move(int _from, int _to) {
+		from = _from;
+		to = _to;
+	}
+	int from, to;
+};
+std::vector<move> moveset;
+
+void HanoiRecursion(int nDisks, int first, int end, int middle)
 {
-	m_sAppName = L"LOS JUEGOS DE TORRE DE HANOI";
+
+	if (nDisks > 0)
+	{
+		HanoiRecursion(nDisks - 1, first, middle, end);
+
+		moveset.push_back(move(first, end));
+
+		HanoiRecursion(nDisks - 1, middle, end, first);
+	}
 }
 
-bool HanoiGame::OnUserCreate()
+mainEngine::mainEngine()
+{
+	m_sAppName = L"LOS JUEGOS DE TORRE DE HANOI / HANOI TOWER";
+}
+
+bool mainEngine::OnUserCreate()
 {
 	mode = 0;
 	mouseHolder = 0;
@@ -15,7 +37,7 @@ bool HanoiGame::OnUserCreate()
 	return true;
 }
 
-bool HanoiGame::OnUserUpdate(float fElapsedTime)
+bool mainEngine::OnUserUpdate(float fElapsedTime)
 {
 	if (state == START)
 	{
@@ -81,19 +103,7 @@ bool HanoiGame::OnUserUpdate(float fElapsedTime)
 	return true;
 }
 
-void HanoiGame::HanoiRecursion(int nDisks, int first, int end, int middle)
-{
-	if (nDisks > 0)
-	{
-		HanoiRecursion(nDisks - 1, first, middle, end);
-
-		moveset.push_back(move(first, end));
-
-		HanoiRecursion(nDisks - 1, middle, end, first);
-	}
-}
-
-bool HanoiGame::GameStartMenu()
+bool mainEngine::GameStartMenu()
 {
 	//fondo
 	Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_CYAN);
@@ -163,7 +173,7 @@ bool HanoiGame::GameStartMenu()
 	return false;
 }
 
-void HanoiGame::SetUpRecursiveHanoi(int disks)
+void mainEngine::SetUpRecursiveHanoi(int disks)
 {
 	int towerA = 0;
 	int towerB = 1;
@@ -176,7 +186,7 @@ void HanoiGame::SetUpRecursiveHanoi(int disks)
 		towers[0].push_back(disks - i);
 }
 
-void HanoiGame::DrawRecursiveHanoiGame(float deltaTime)
+void mainEngine::DrawRecursiveHanoiGame(float deltaTime)
 {
 	static float timer = 0;
 	static int nmove = 0;
@@ -224,14 +234,14 @@ void HanoiGame::DrawRecursiveHanoiGame(float deltaTime)
 	}
 }
 
-void HanoiGame::SetUpStackHanoi(int disks)
+void mainEngine::SetUpStackHanoi(int disks)
 {
 	//insert disks on tower 0
 	for (int i = 0; i < disks; i++)
 		towers[0].push_back(disks - i);
 }
 
-void HanoiGame::CheckMouseInput()
+void mainEngine::CheckMouseInput()
 {
 	if (GetMouse(0).bReleased)
 	{
@@ -277,7 +287,7 @@ void HanoiGame::CheckMouseInput()
 
 }
 
-void HanoiGame::DrawStackHanoiGame()
+void mainEngine::DrawStackHanoiGame()
 {
 	//controles
 	CheckMouseInput();
@@ -309,31 +319,29 @@ void HanoiGame::DrawStackHanoiGame()
 
 }
 
-void HanoiGame::SetUpStackAutoHanoiGame(int disks)
+void mainEngine::SetUpStackAutoHanoiGame(int disks)
 {
 	HanoiRecursion(disks, 0, 2, 1);
-
 
 	//carga la torre 0 con los discos
 	for (int i = 0; i < disks; i++)
 		towers[0].push_back(disks - i);
 }
 
-void HanoiGame::DrawStackAuto(float deltaTime)
+void mainEngine::DrawStackAuto(float deltaTime)
 {
 	static float timer = 0;
 	static int nmove = 0;
 	timer += deltaTime;
 
-	if (timer > 1.0)
+	if (timer > 0.6)
 	{
-		timer -= 1.0;
+		timer -= 0.6;
 		if (nmove < moveset.size())
 		{
 			towers[moveset[nmove].to].push_back(towers[moveset[nmove].from].back());
 			towers[moveset[nmove].from].pop_back();
 
-			//seguridad
 			towers[moveset[nmove].from].shrink_to_fit();
 			towers[moveset[nmove].to].shrink_to_fit();
 
@@ -361,7 +369,7 @@ void HanoiGame::DrawStackAuto(float deltaTime)
 
 }
 
-void HanoiGame::DrawTowers(short background, short disksColor)
+void mainEngine::DrawTowers(short background, short disksColor)
 {
 	Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', background);
 	//torres texto
@@ -428,7 +436,7 @@ void HanoiGame::DrawTowers(short background, short disksColor)
 
 }
 
-void HanoiGame::DrawScores()
+void mainEngine::DrawScores()
 {
 	Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_BLACK);
 
@@ -463,19 +471,19 @@ void HanoiGame::DrawScores()
 	}
 }
 
-void HanoiGame::ClearVectors()
+void mainEngine::ClearVectors()
 {
-	moveset.clear();
 	moveset.shrink_to_fit();
+	moveset.clear();
 	for (int i = 0; i < 3; i++)
 	{
-		towers[i].clear();
 		towers[i].shrink_to_fit();
+		towers[i].clear();
 	}
 
 }
 
-void HanoiGame::DrawCredits()
+void mainEngine::DrawCredits()
 {
 	Fill(0, 0, ScreenWidth(), ScreenHeight(), ' ', BG_DARK_BLUE);
 	DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"DEVELOP BY:", FG_WHITE);
@@ -497,7 +505,7 @@ void HanoiGame::DrawCredits()
 
 }
 
-void HanoiGame::GetUsersName(float deltaTime)
+void mainEngine::GetUsersName(float deltaTime)
 {
 	DrawString(ScreenWidth() / 2 - 30, ScreenHeight() / 2 - 10, L"**INSERTANDO**...", FG_DARK_YELLOW);
 	static std::wstring name = L"";
@@ -534,7 +542,7 @@ void HanoiGame::GetUsersName(float deltaTime)
 
 }
 
-void HanoiGame::PointsSystem(int moves)
+void mainEngine::PointsSystem(int moves)
 {
 	if (points > 0)
 	{
@@ -542,7 +550,7 @@ void HanoiGame::PointsSystem(int moves)
 		{
 			points -= 1000;
 		}
-		if (moves % 15 == 0 && diskAmount == 4)
+		if (moves % 15 == 0 & diskAmount == 4)
 		{
 			points -= 500;
 		}
@@ -566,7 +574,7 @@ void HanoiGame::PointsSystem(int moves)
 	else points = 0;
 }
 
-void HanoiGame::SortLists()
+void mainEngine::SortLists()
 {
 	for (int i = 0; i < pointsplayers.size() - 1; i++)
 	{
@@ -586,12 +594,3 @@ void HanoiGame::SortLists()
 		}
 	}
 }
-
-
-
-
-
-
-
-
-

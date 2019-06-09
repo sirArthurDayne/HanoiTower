@@ -18,12 +18,18 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\HanoiGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\olcConsoleGameEngineOOP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\olcConsoleGameEngine.h">
+    <ClInclude Include="src\HanoiGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\HanoiGame.h">
+    <ClInclude Include="src\olcConsoleGameEngineOOP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
